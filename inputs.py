@@ -16,3 +16,10 @@ def read_number(prompt: str, minimum: int, maximum: int) -> int:
             return value
 
         print(f"{minimum}~{maximum} 사이의 숫자를 입력하세요.")
+
+def read_text(prompt: str) -> str:
+    while True:
+        value = input(prompt).strip()
+        if value:
+            return value
+        print("빈 문자열은 등록할 수 없습니다. 다시 입력하세요.")

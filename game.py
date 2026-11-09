@@ -4,7 +4,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from defaults import make_default_quizzes
-from inputs import read_number
+from inputs import read_number, read_text
 from quiz import Quiz
 
 
@@ -109,6 +109,23 @@ class QuizGame:
         points = correct * 100 // total
         print(f"\n결과: {total}문제 중 {correct}문제 정답! ({points}점)")
 
+    def add_quiz(self):
+        print("새로운 퀴즈를 추가합니다.")
+        question = read_text("문제를 입력하세요: ")
+
+        choices = []
+        for number in range(1, 5):
+            choices.append(read_text(f"선택지 {number}: "))
+
+        answer = read_number("정답 번호 (1~4): ", 1, 4)
+
+        self.quizzes.append(Quiz(question, choices, answer))
+        self.dirty = True
+        if self.save():
+            print("퀴즈가 추가되었습니다!")
+        else:
+            print("퀴즈를 메모리에 추가했습니다. 종료 시 저장을 다시 시도합니다.")
+
     def run(self):
         while True:
             self.show_menu()
@@ -116,6 +133,8 @@ class QuizGame:
 
             if choice == 1:
                 self.play()
+            elif choice == 2:
+                self.add_quiz()
             elif choice == 5:
                 return
             else:
