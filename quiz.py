@@ -20,3 +20,16 @@ class Quiz:
 
     def is_correct(self, guess: int) -> bool:
         return guess == self.answer
+
+    def to_dict(self):
+        return {
+            "question": self.question,
+            "choices": self.choices,
+            "answer": self.answer,
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        if not isinstance(data, dict):
+            raise ValueError("퀴즈 한 개는 JSON 객체여야 합니다.")
+        return cls(data.get("question"), data.get("choices"), data.get("answer"))
