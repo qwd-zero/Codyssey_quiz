@@ -1,3 +1,5 @@
+import random
+
 from defaults import make_default_quizzes
 from inputs import read_number
 
@@ -16,11 +18,13 @@ def play(quizzes):
         print("등록된 퀴즈가 없습니다. 메뉴 2에서 먼저 추가하세요.")
         return
 
-    total = len(quizzes)
+    round_quizzes = quizzes.copy()
+    random.shuffle(round_quizzes)
+    total = len(round_quizzes)
     correct = 0
     print(f"\n퀴즈를 시작합니다! (총 {total}문제)")
 
-    for number, quiz in enumerate(quizzes, start=1):
+    for number, quiz in enumerate(round_quizzes, start=1):
         quiz.show(number)
         guess = read_number("정답 입력 (1~4): ", 1, 4)
 
