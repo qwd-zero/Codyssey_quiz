@@ -11,6 +11,19 @@ from quiz import Quiz
 STATE_FILE = Path(__file__).resolve().with_name("state.json")
 
 
+def validate_best_score(best):
+    if best is None:
+        return
+    if not isinstance(best, dict):
+        raise ValueError("최고 기록 형식이 올바르지 않습니다.")
+
+    points, correct, total = (best.get(key) for key in ("points", "correct", "total"))
+    if any(type(value) is not int for value in (points, correct, total)):
+        raise ValueError("최고 기록에는 정수가 필요합니다.")
+    if total < 1 or not 0 <= correct <= total or points != correct * 100 // total:
+        raise ValueError("최고 기록의 점수와 문제 수가 맞지 않습니다.")
+
+
 class QuizGame:
     def __init__(self):
         self.quizzes = []
@@ -30,6 +43,7 @@ class QuizGame:
 
             quizzes = [Quiz.from_dict(item) for item in data["quizzes"]]
             best = data["best_score"]
+            validate_best_score(best)
 
         except FileNotFoundError:
             print("첫 실행입니다. 기본 퀴즈로 시작합니다.")
@@ -108,6 +122,7 @@ class QuizGame:
 
         points = correct * 100 // total
         print(f"\n결과: {total}문제 중 {correct}문제 정답! ({points}점)")
+        self.record_best(correct, total, points)
 
     def add_quiz(self):
         print("새로운 퀴즈를 추가합니다.")
@@ -135,6 +150,23 @@ class QuizGame:
         for number, quiz in enumerate(self.quizzes, start=1):
             print(f"[{number}] {quiz.question}")
 
+    def record_best(self, correct, total, points):
+        if self.best_score is not None and points <= self.best_score["points"]:
+            return
+
+        self.best_score = {"points": points, "correct": correct, "total": total}
+        self.dirty = True
+        if self.save():
+            print("새로운 최고 점수입니다!")
+
+    def show_score(self):
+        if self.best_score is None:
+            print("아직 완료한 게임이 없습니다.")
+            return
+
+        best = self.best_score
+        print(f"최고 점수: {best['points']}점 ({best['total']}문제 중 {best['correct']}문제 정답)")
+
     def run(self):
         while True:
             self.show_menu()
@@ -146,6 +178,8 @@ class QuizGame:
                 self.add_quiz()
             elif choice == 3:
                 self.list_quizzes()
+            elif choice == 4:
+                self.show_score()
             elif choice == 5:
                 return
             else:
